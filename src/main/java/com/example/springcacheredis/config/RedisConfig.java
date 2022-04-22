@@ -74,37 +74,4 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
-	/**
-	 * LocalDateTime 값을 직렬화하기 위한 ObjectMapper 설정
-	 */
-	@Bean
-	public ObjectMapper objectMapper(){
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		mapper.registerModules(new JavaTimeModule(), new Jdk8Module());
-		return mapper;
-	}
-
-	/**
-	 Redis Cache 적용을 위한 RedisCacheManager 설정
-	 - RedisTemplate이 아닌 @Cacheable, @CacheEvict, @CachePut등에 적용
-	 */
-	@Bean
-	public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper){
-		RedisCacheConfiguration configuration = RedisCacheConfiguration.defaultCacheConfig()
-			.disableCachingNullValues()
-			.entryTtl(Duration.ofSeconds(60))
-			.serializeKeysWith(
-				RedisSerializationContext.SerializationPair
-					.fromSerializer(new StringRedisSerializer()))
-			.serializeValuesWith(
-				RedisSerializationContext.SerializationPair
-					.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
-
-		return RedisCacheManager.RedisCacheManagerBuilder
-			.fromConnectionFactory(redisConnectionFactory)
-			.cacheDefaults(configuration)
-			.build();
-
-	}
 }
